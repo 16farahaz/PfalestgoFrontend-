@@ -5,10 +5,16 @@ import{Link} from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { Dropdown } from 'react-native-element-dropdown';
+import { useRouter } from 'expo-router';
 
-
+interface DropdownOption {
+  value: string ;
+  label: string;
+  image: any; // For images, you can use 'require' or import statements.
+  
+}
 export default function Index() {
- 
+  const router = useRouter();
  
   const [destination, setDestination] = useState('');
   const [currentLocation, setCurrentLocation] = useState('');
@@ -16,29 +22,41 @@ export default function Index() {
   const [passenger, setPassenger] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);  // State for toggling dropdown visibility
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(null);
+  const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const navigation = useNavigation();
-  const options = [
-    { value: 'Signin', label: 'Sign in', image: require('../../assets/images/user.png') },
-    { value: 'Signup', label: 'Sign up', image: require('../../assets/images/user2.png') },
-    { value: 'About', label: 'About us', image: require('../../assets/images/about.png') },
+  const options :DropdownOption[] = [
+    { value: 'Signin', label: 'Sign in', image: require('../assets/images/user.png') },
+    { value: 'Signup', label: 'Sign up', image: require('../assets/images/user2.png') },
+    { value: 'About', label: 'About us', image: require('../assets/images/about.png') },
   ];
 
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);  // Toggle the dropdown visibility
   };
 
-  const handleDropdownChange = (item) => {
+  const handleDropdownChange = (item: DropdownOption) => {
     setSelectedValue(item.value);
     setIsDropdownOpen(false);  // Close the dropdown after selection
-    navigation.navigate(item.value);  // Navigate to the selected screen
+  
+    // Define valid paths
+    const validPaths = ['/Signin', '/Signup', '/About'];
+  
+    // Dynamically create the path
+    const selectedPath = `/${item.value}`;
+  
+    // Check if the path is valid before navigating
+    if (validPaths.includes(selectedPath)) {
+      router.push(selectedPath);
+    } else {
+      console.error('Invalid path', selectedPath);
+    }
   };
 
-  const renderDropdownItem = (item) => (
+  const renderDropdownItem = (item:DropdownOption) => (
     <TouchableOpacity onPress={() => handleDropdownChange(item)} style={styles.dropdownItem}>
-      <Image source={item.image} style={styles.dropdownImage} />
-      <Text style={styles.dropdownLabel}>{item.label}</Text>
-    </TouchableOpacity>
+    <Image source={item.image} style={styles.dropdownImage} />
+    <Text style={styles.dropdownLabel}>{item.label}</Text>
+  </TouchableOpacity>
   );
 
 
@@ -71,7 +89,7 @@ export default function Index() {
     <SafeAreaView style={styles.container}>
       <View style={styles.cont1}>
         <View>
-          <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
+          <Image source={require('../assets/images/logo.png')} style={styles.logo} />
         </View>
         
         <TouchableOpacity onPress={handleDropdownToggle} style={styles.dropdownButton}>
@@ -90,7 +108,7 @@ export default function Index() {
 
       <View style={styles.box}>
         <View style={styles.choix1}>
-          <Image source={require('../../assets/images/des.png')} style={styles.logo3} />
+          <Image source={require('../assets/images/des.png')} style={styles.logo3} />
           <TextInput
             style={styles.textInput}
             placeholder="      Your destination"
@@ -100,7 +118,7 @@ export default function Index() {
         </View>
 
         <View style={styles.choix1}>
-          <Image source={require('../../assets/images/loc.png')} style={styles.logo2} />
+          <Image source={require('../assets/images/loc.png')} style={styles.logo2} />
           <TextInput
             style={styles.textInput}
             placeholder="      Where are you now !"
@@ -110,7 +128,7 @@ export default function Index() {
         </View>
 
         <View style={styles.choix1}>
-          <Image source={require('../../assets/images/cal.png')} style={styles.logo2} />
+          <Image source={require('../assets/images/cal.png')} style={styles.logo2} />
           <TextInput
             style={styles.textInput}
             placeholder="      Time and Date"
@@ -120,7 +138,7 @@ export default function Index() {
         </View>
 
         <View style={styles.choix1}>
-          <Image source={require('../../assets/images/pas.png')} style={styles.logo2} />
+          <Image source={require('../assets/images/pas.png')} style={styles.logo2} />
           <TextInput
             style={styles.textInput}
             placeholder="      1 passenger"
@@ -130,7 +148,7 @@ export default function Index() {
         </View>
 
         <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}  onPress={() => navigation.navigate('Signin')}>
+        <TouchableOpacity style={styles.button}  onPress={() => router.push('/Signin')}>
           <Text style={styles.buttonText}>Find your Ride !</Text>
         </TouchableOpacity>
         </View>

@@ -7,18 +7,21 @@ export default function TabsLayout() {
         headerShown: false, // Hide header for all stack screens
       }}
     >
-      <Stack.Screen 
-        name="Signin" 
-        options={{ title: "Sign In" }} 
-      />
-      <Stack.Screen 
-        name="Signup" 
-        options={{ title: "Sign Up" }} 
-      />
+     
+
       <Stack.Screen 
         name="Home" 
         options={{ title: "Home" }} 
       />
+      <Stack.Screen 
+        name="Signupps" 
+        options={{ title: "Signupps" }} 
+      />
+      <Stack.Screen 
+        name="OrderRide" 
+        options={{ title: "OrderRide" }} 
+      />
+      
     </Stack>
   );
 }

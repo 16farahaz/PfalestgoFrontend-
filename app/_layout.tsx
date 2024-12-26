@@ -1,14 +1,16 @@
-import { Stack } from 'expo-router';
+// app/_layout.tsx
+import { Stack } from "expo-router";
 
 export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* Default screens */}
       <Stack.Screen name="index" />
-      <Stack.Screen name="(tabs)" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="Signin" />
+      {/* Section-specific layouts */}
+      <Stack.Screen name="Driver" />
+      <Stack.Screen name="Passenger" />
+      <Stack.Screen name="Superadmin" />
     </Stack>
   );
 }

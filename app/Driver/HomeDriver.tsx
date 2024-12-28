@@ -31,6 +31,7 @@ const HomeDriver = () => {
   const [filteredRides, setFilteredRides] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(3);
+  const [formattedDate, setFormattedDate] = useState('');
   const userid = AsyncStorage.getItem('userId');  // Await to get rideId
 
   const options :DropdownOption[] = [
@@ -63,29 +64,37 @@ const HomeDriver = () => {
     }
   };
 
+  // Fonction de formatage de la date
+ const formatDate = (date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0'); // Les mois commencent à 0, donc ajoutons 1.
+  const day = String(d.getDate()).padStart(2, '0'); // Ajoute un zéro devant le jour si nécessaire.
 
-  useEffect(() => {
-    
-    axios.get('http://192.168.1.7:5000/ride/rides')
+  return `${year}-${month}-${day}`;
+};
+// Fetch rides
+useEffect(() => {
+ 
+    axios.get(`http://192.168.1.7:5000/ride/rides`)
       .then((response) => {
-        console.log(userid);
-        const formattedData = response.data.map(ride => {
-          const date = new Date(ride.timeDate);
-          const formattedDate = date.toISOString().slice(0, 16).replace('T', ' '); // 'YYYY-MM-DD HH:MM'
-          
-          return {
-            ...ride,
-            timeDate: formattedDate
-          };
-        });
-  
-        console.log(formattedData);  // Log to check the transformed data
-        setRides(formattedData);
-        setFilteredRides(formattedData);
+        console.log('User ID:', userid);
+        console.log(response.data);
+     // Formater la date de chaque élément de la réponse
+    const formattedRides = response.data.map((ride) => ({
+      ...ride,
+      Datee: formatDate(ride.Datee), // Formate la date ici
+
+      }));
+
+
+
+        setRides(formattedRides);
+        setFilteredRides(formattedRides);
       })
       .catch((err) => console.log(err));
-  }, []);
   
+}, []);
   useEffect(() => {
     if (searchQuery) {
       setFilteredRides(
@@ -145,24 +154,29 @@ const HomeDriver = () => {
         <DataTable style={styles.container}>
           <DataTable.Header style={styles.tableHeader}>
             <DataTable.Title>Rides</DataTable.Title>
+            <DataTable.Title>Date</DataTable.Title>
             <DataTable.Title>Time</DataTable.Title>
             <DataTable.Title>Price</DataTable.Title>
+            <DataTable.Title>Available place</DataTable.Title>
+
         {/*     <DataTable.Title>Available</DataTable.Title> */}
-            <DataTable.Title>Actions</DataTable.Title>
+            {/* <DataTable.Title>Actions</DataTable.Title> */}
           </DataTable.Header>
           {currentItems.map((ride, index) => (
             <DataTable.Row key={index}>
               <DataTable.Cell>
                 {ride.currentLocation} - {ride.destination}
               </DataTable.Cell>
-              <DataTable.Cell>{ride.timaDate}</DataTable.Cell>
+              <DataTable.Cell>{ride.Datee}</DataTable.Cell>
+              <DataTable.Cell>{ride.timeText}</DataTable.Cell>
               <DataTable.Cell>{ride.price}</DataTable.Cell>
+               <DataTable.Cell>{ride.passenger}</DataTable.Cell>
             {/*   <DataTable.Cell>{ride.available}</DataTable.Cell> */}
-              <DataTable.Cell>
-                <TouchableOpacity onPress={() => router.push(`/PassengerOrderride/${ride._id}`)}>
+          {/*     <DataTable.Cell>
+                <TouchableOpacity onPress={() => router.push(`/Passenger/Orderride`)}>
                   <Image source={require('../../assets/images/order.png')} style={styles.imgg} />
                 </TouchableOpacity>
-              </DataTable.Cell>
+              </DataTable.Cell> */}
             </DataTable.Row>
           ))}
         </DataTable>

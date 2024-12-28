@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { launchImageLibrary } from 'react-native-image-picker';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 interface FormErrors {
   name?: string;
   lastName?: string;
@@ -166,6 +166,7 @@ const handleSignup = async () => {
     alert('Account Created Successfully!');
 
     setSuccessMessage('Account Created Successfully!');
+    
     console.log(imageUri);
     router.push('/Driver/Verifmail'); // Navigate after success
   } catch (error) {

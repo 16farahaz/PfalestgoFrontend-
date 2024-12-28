@@ -61,9 +61,11 @@ const Signin = () => {
       });
 
       // Save token or other authentication details
-      await AsyncStorage.setItem('authToken', response.data.token);
-      await AsyncStorage.setItem('userId', response.data.id);
+     // await AsyncStorage.setItem('authToken', response.data.token);
+      //await AsyncStorage.setItem('userId', response.data.id);
       if (response.data.success) {
+        await AsyncStorage.setItem('authToken', response.data.token);
+        await AsyncStorage.setItem('userId', response.data.id);
         alert('successfully loged');
         console.log(response.data.id);
         // Redirect based on role

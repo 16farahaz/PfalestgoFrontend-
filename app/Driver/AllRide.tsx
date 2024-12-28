@@ -56,21 +56,31 @@ const AllRide = () => {
 
   return `${year}-${month}-${day}`;
 };
-
 useEffect(() => {
   const fetchData = async () => {
     try {
-      const rideId = await AsyncStorage.getItem('userId');
-      console.log(rideId);
-      if (rideId) {
-        const response = await axios.get(`http://192.168.1.7:5000/ride/myride/${rideId}`);
+      const userId = await AsyncStorage.getItem('userId');
+      console.log(userId);
+      if (userId) {
+        const response = await axios.get(`http://192.168.1.7:5000/ride/myride/${userId}`);
         console.log(response.data);
-       
-        // Formater la date de chaque élément de la réponse
+
+        await AsyncStorage.setItem('userId', userId);
+
+        // Iterate through each ride to log its ride_id
+        response.data.forEach((ride) => {
+          console.log('Navigating to: ', ride._id);
+        });
+
+        // Optionally log the first ride's ride_id
+        console.log('Navigating to the first ride: ', response.data[0]?._id);
+
+        // Formate the date of each ride
         const formattedRides = response.data.map((ride) => ({
           ...ride,
-          Datee: formatDate(ride.Datee), // Formate la date ici
+          Datee: formatDate(ride.Datee), // Format the date here
         }));
+
         setRides(formattedRides);
         setFilteredRides(formattedRides);
       }
@@ -80,6 +90,7 @@ useEffect(() => {
   };
   fetchData();
 }, []);
+
 
 
   useEffect(() => {
@@ -147,7 +158,10 @@ useEffect(() => {
           {currentItems.map((ride, index) => (
           <TouchableOpacity 
           key={index} 
-          onPress={() => router.push(`/Driver/RideDetails/${ride._id}`)} 
+          onPress={() => router.push({
+            pathname: "/Driver/[id]", 
+            params: { id: ride._id }
+          })} 
           activeOpacity={0.8} 
         >
           <DataTable.Row>

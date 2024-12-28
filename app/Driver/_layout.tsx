@@ -42,6 +42,10 @@ export default function TabsLayout() {
         name="RideDetails" 
         options={{ title: "RideDetails" }} 
       />
+
+       <Stack.Screen name="[id]" 
+       options={{ title: 'Driver Details' }}
+        />
     </Stack>
   );
 }

@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, StyleSheet, Image, Text, TextInput, SafeAreaView, Alert, Pressable, Platform } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import axios from 'axios';
 import DateTimePicker from '@react-native-community/datetimepicker';
+
 
 
 export default function UpdateRide({ route }) {
   const router = useRouter();
   // Access the `id` from route.params
-  const { id } = route.params;
+  const { id } = useLocalSearchParams<{id: string}>();
   console.log(id);
 
   // State variables for the ride details and form
@@ -37,7 +38,7 @@ console.log(rideId); */
     console.log(id);
     setLoading(true);
     try {
-      const response = await axios.get(`http://192.168.1.7:5000/ride/rides/${rideId}`);
+      const response = await axios.get(`http://192.168.1.7:5000/ride/rides/${id}`);
       const rideData = response.data;
 
       // Update state with the fetched data
@@ -57,15 +58,15 @@ console.log(rideId); */
 
   // Fetch ride data when the component mounts or rideId changes
   useEffect(() => {
-    if (rideId) {
+    if (id) {
       fetchRideData();
     }
-  }, [rideId]);
+  }, [id]);
 
   const handleUpdate = async () => {
     const data = { destination, currentLocation, Datee, timeText, passenger, price };
     try {
-      const response = await axios.put(`http://192.168.1.7:5000/ride/rides/${rideId}`, data);
+      const response = await axios.put(`http://192.168.1.7:5000/ride/rides/${id}`, data);
       if (response.status === 200) {
         alert('Your ride was updated successfully!');
         setTimeout(() => {

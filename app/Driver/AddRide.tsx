@@ -139,6 +139,7 @@ const handlePress = async () => {
   try {
     // Save to AsyncStorage
     await AsyncStorage.setItem('userRideData', JSON.stringify(data));
+    const userId =await AsyncStorage.getItem('userId');
    
 
     // Send to backend
@@ -330,7 +331,7 @@ const styles = StyleSheet.create({
     width: 350,
     marginLeft: 30,
     padding: 20,
-    shadowRadius: 50,
+    boxShadow: '0px 2px 50px rgba(0, 0, 0, 0.8)'
   },
   choix1: {
     flexDirection: 'row',

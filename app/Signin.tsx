@@ -1,11 +1,12 @@
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth'; 
 
 interface FormErrors {
   email?: string;
@@ -25,104 +26,114 @@ const Signin = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [touched, setTouched] = useState({ email: false, password: false });
 
-
   useEffect(() => {
     validateForm();
-  }, [email, motpasse ]);
+  }, [email, motpasse]);
 
-  const validateForm = (values?: { email?: string; password?: string }) => {
-    const { email: currentEmail = email, password: currentPassword = motpasse } = values || {};
+  const validateForm = () => {
     let errors: FormErrors = {};
-  
-    if (!currentEmail) {
+    if (!email) {
       errors.email = 'Email is required.';
     }
-    if (!currentPassword) {
+    if (!motpasse) {
       errors.motpasse = 'Password is required.';
     }
-  
     setErrors(errors);
     setIsFormValid(Object.keys(errors).length === 0);
-  
-    setTouched({
-      email: true,
-      password: true,
-    });
   };
-  
-  
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    if (!isFormValid) return;
+
+    setIsLoading(true);
     try {
       const response = await axios.post('http://192.168.1.7:5000/user/login', {
         email,
-        motpasse: motpasse,
+        motpasse,
       });
 
-      // Save token or other authentication details
-     // await AsyncStorage.setItem('authToken', response.data.token);
-      //await AsyncStorage.setItem('userId', response.data.id);
       if (response.data.success) {
         await AsyncStorage.setItem('authToken', response.data.token);
         await AsyncStorage.setItem('userId', response.data.id);
-        alert('successfully loged');
+        alert('Successfully logged in');
         console.log(response.data.id);
-        // Redirect based on role
         router.push(response.data.redirectUrl);
-        
       } else {
         alert('Invalid credentials');
       }
-   
     } catch (error) {
       if (error.response) {
-        // Server responded with a status other than 2xx
         setError(error.response.data.message || 'Login failed. Please try again.');
       } else if (error.request) {
-        // The request was made but no response was received
         setError('Network error. Please check your connection.');
       } else {
-        // Something happened in setting up the request
         setError('An unexpected error occurred.');
       }
+    } finally {
+      setIsLoading(false);
     }
-    
   };
 
+GoogleSignin.configure({
+      webClientId: '810015844591-51iv2vru4e2stq7ob1q1hvuf4ejpvbk3.apps.googleusercontent.com',
+    });
+  async function onGoogleButtonPress() {
+    // Check if your device supports Google Play
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    // Get the users ID token
+    const signInResult = await GoogleSignin.signIn();
+  
+    // Try the new style of google-sign in result, from v13+ of that module
+    idToken = signInResult.data?.idToken;
+    if (!idToken) {
+      // if you are using older versions of google-signin, try old style result
+      idToken = signInResult.idToken;
+    }
+    if (!idToken) {
+      throw new Error('No ID token found');
+    }
+  
+    // Create a Google credential with the token
+    const googleCredential = auth.GoogleAuthProvider.credential(signInResult.data.token);
+  
+    // Sign-in the user with the credential
+    return auth().signInWithCredential(googleCredential);
+  }
+ 
   return (
     <SafeAreaView style={styles.body}>
       <View style={styles.im}>
         <Image source={require('../assets/images/sign2.png')} style={styles.img1} />
       </View>
       <View style={styles.signform}>
-      <TextInput
-  style={styles.inputsp}
-  placeholder="Email"
-  value={email}
-  onChangeText={(text) => {
-    setEmail(text);
-    validateForm({ email: text });
-  }}
-  onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
-/>
-{touched.email && errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+        <TextInput
+          style={styles.inputsp}
+          placeholder="Email"
+          value={email}
+          onChangeText={(text) => {
+            setEmail(text);
+            validateForm();
+          }}
+          onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+        />
+        {touched.email && errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
-<TextInput
-  style={styles.inputsp}
-  placeholder="Password"
-  value={motpasse}
-  onChangeText={(text) => {
-    Setmotpasse(text);
-    validateForm({ password: text });
-  }}
-  secureTextEntry
-  onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
-/>
-{touched.password && errors.motpasse && <Text style={styles.errorText}>{errors.motpasse}</Text>}
+        <TextInput
+          style={styles.inputsp}
+          placeholder="Password"
+          value={motpasse}
+          onChangeText={(text) => {
+            Setmotpasse(text);
+            validateForm();
+          }}
+          secureTextEntry
+          onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
+        />
+        {touched.password && errors.motpasse && <Text style={styles.errorText}>{errors.motpasse}</Text>}
 
-
-        {errors.error && <Text style={styles.errorText}>{errors.error}</Text>}
+        {error && <Text style={styles.errorText}>{error}</Text>}
 
         <TouchableOpacity
           style={[styles.button, { opacity: isFormValid ? 1 : 0.5 }]}
@@ -141,7 +152,7 @@ const Signin = () => {
 
       <Text style={styles.title}>You can sign in with</Text>
       <View style={styles.googlegithub}>
-        <TouchableOpacity onPress={() => router.push('/#')}>
+        <TouchableOpacity onPress={onGoogleButtonPress}>
           <Image source={require('../assets/images/gmail2.png')} style={styles.imgg} />
         </TouchableOpacity>
 
@@ -215,14 +226,13 @@ const styles = StyleSheet.create({
     marginLeft: 85,
     backgroundColor: '#B7B7B7',
     height: 110,
-    width:230,
+    width: 230,
     padding: 40,
     borderRadius: 50,
     marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    
   },
   imgg: {
     width: 60,
